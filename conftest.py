@@ -17,3 +17,19 @@ class QuickPizza(requests.Session):
 def api():
     with QuickPizza() as session:
         yield session
+
+
+def log_in_new_user(api):
+    """Create a user with a new name, log in, and return its header."""
+    name = "lab-" + uuid.uuid4().hex[:12]
+    user = {"username": name, "password": "Pizza-2026"}
+    res = api.post("/api/users", json=user)
+    assert res.status_code == 201
+    res = api.post("/api/users/token/login", json=user)
+    assert res.status_code == 200
+    return {"Authorization": "token " + res.json()["token"]}
+
+
+@pytest.fixture
+def auth(api):
+    return log_in_new_user(api)
