@@ -40,3 +40,14 @@ def pizza_id(api, auth):
     res = api.post("/api/pizza", json={}, headers=auth)
     assert res.status_code == 200
     return res.json()["pizza"]["id"]
+
+
+@pytest.fixture
+def rating(api, auth, pizza_id):
+    """A rating with 3 stars, made before the test and deleted after it."""
+    new = {"pizza_id": pizza_id, "stars": 3}
+    res = api.post("/api/ratings", json=new, headers=auth)
+    assert res.status_code == 201
+    made = res.json()
+    yield made
+    api.delete(f"/api/ratings/{made['id']}", headers=auth)
